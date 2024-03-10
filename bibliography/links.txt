@@ -1,0 +1,4 @@
+https://github.com/TDAmeritrade/stumpy
+https://towardsdatascience.com/part-10-discovering-multidimensional-time-series-motifs-45da53b594bb
+http://alumni.cs.ucr.edu/~mueen/pdf/EM.pdf
+https://arxiv.org/pdf/2206.03735.pdf
