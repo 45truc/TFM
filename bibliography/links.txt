@@ -2,3 +2,9 @@ https://github.com/TDAmeritrade/stumpy
 https://towardsdatascience.com/part-10-discovering-multidimensional-time-series-motifs-45da53b594bb
 http://alumni.cs.ucr.edu/~mueen/pdf/EM.pdf
 https://arxiv.org/pdf/2206.03735.pdf
+
+Now on about graph nn:
+EEG-Based Emotion Recognition Using Regularized Graph Neural Networks: https://ieeexplore.ieee.org/abstract/document/9091308
+Graph Neural Network-based EEG Classification: A Survey: https://arxiv.org/pdf/2310.02152.pdf
+CAUSALITY-INSPIRED SPATIAL-TEMPORAL EXPLANATIONS FOR DYNAMIC GRAPH NEURAL NETWORKS: https://openreview.net/pdf?id=AJBkfwXh3u
+A Comprehensive Survey on Graph Neural Networks: https://ieeexplore.ieee.org/abstract/document/9046288
