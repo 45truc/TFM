@@ -6,6 +6,7 @@ import sys
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import scipy.signal as spsg
 
 def plot_(array, channel, trial, block):
     y = array[channel, :, trial, block]
@@ -57,10 +58,18 @@ def get_data_subject(data, sub, selection_critirium=None):
     array_tuples = [tuple(array) for array in channel_info.values()]
     unique_tuples = set(array_tuples)
     unique_arrays = [np.array(tuple_) for tuple_ in unique_tuples]
-    
+
+    if sub in {1,4,6}:
+        prob = []
+        for block in range(12):
+            if Check_Problematic(sub,block):
+                prob.append(block)
+        #Eliminate arrays with all channels    
+        unique_arrays
+        
     if selection_critirium==None:
         #Select the set of missing chanels
-        #In this case we take all blocks unless, probelamtis need to be seen separetly
+        #In this case we take all blocks unless, probelamtics need to be seen separetly
         seto = set()
         for arr in unique_arrays:
             seto = seto | set(arr)
@@ -77,3 +86,52 @@ def get_data_subject(data, sub, selection_critirium=None):
     #if Check_Problematic(sub,block)
     
     return data['dataSorted'][active_channels][...,blocks], blocks
+
+def Generate_data(blocks):
+    labels = [0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2]
+    filtered_labels = []
+    for b in blocks:
+        filtered_labels.append(labels[b])
+    
+    #re_sample and blocks already loaded
+    Y_sample = np.repeat(filtered_labels, 108)
+    Y_hot = torch.Tensor(np.eye(3)[Y_sample])
+    return Y_sample, Y_hot 
+
+def Load_Data(subj=0, data_path = f"E:\data/", Ffilter=False):
+    '''
+     data_path = f"E:\data/dataClean-ICA3-{num}-T1.mat"
+     subj = 0,...,10
+     num = 25,...,35
+    '''
+    data = loadmat(data_path+f'dataClean-ICA3-{25+subj}-T1.mat')
+    sample, blocks = get_data_subject(data, sub=subj, selection_critirium=None)
+    sha = sample.shape
+    sample = np.reshape(sample, (sha[0],sha[1],sha[2]*sha[3]), order='F').T
+    sample = np.moveaxis(sample, 1, 2)
+    sample = torch.Tensor(sample)
+
+    Y_sample, Y_hot = Generate_data(blocks)
+
+    if Ffilter:
+        return filter_data(sample), Y_sample, Y_hot
+    else:
+        return sample, Y_sample, Y_hot
+        
+
+def bandpass_filtering(lfp, frq=1000, lp=250., hp=500.):
+    '''
+    Manuel
+    '''
+    b,a = spsg.iirfilter(3, [lp/frq,hp/frq], btype='bandpass', ftype='butter')
+    filtered = np.empty(lfp.shape)
+    for i, d in enumerate(lfp):
+        # print(i, end=" ")
+        filtered[i] = spsg.filtfilt(b, a, d)
+    return filtered
+
+def filter_data(re_sample):
+    filtered = np.zeros(re_sample.shape)
+    for s in range(re_sample.shape[0]):
+        filtered[s] = bandpass_filtering(re_sample[s], frq=1000, lp=250., hp=500.)
+    return filtered
