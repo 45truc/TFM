@@ -47,25 +47,19 @@ def summary(array, text=True):
 
 def get_data_subject(data, sub, selection_critirium=None):
     
-    def Check_Problematic(sub,block):
-        if not(sub in range(0,11)):
-            sub = sub - 25
-        return    (sub==1 and (block==4 or block ==9))or(
-                   sub==4 and (block==2 or block ==9)
-                  )or(sub==6 and (block==5 or block ==11))
-    
     channel_info = summary(data['dataSorted'], text=False) 
     array_tuples = [tuple(array) for array in channel_info.values()]
     unique_tuples = set(array_tuples)
     unique_arrays = [np.array(tuple_) for tuple_ in unique_tuples]
 
+    #Dealing with problematic subjects
+    blocks = np.array(range(12))
+    #From the data exploraion
+    problematic = {1:{4,9}, 4:{2,9}, 6:{5,11}}
     if sub in {1,4,6}:
-        prob = []
-        for block in range(12):
-            if Check_Problematic(sub,block):
-                prob.append(block)
+        blocks = np.array([x for x in blocks if not(x in problematic[sub])])
         #Eliminate arrays with all channels    
-        unique_arrays
+        unique_arrays = [x for x in unique_arrays if len(x)<59]
         
     if selection_critirium==None:
         #Select the set of missing chanels
@@ -74,7 +68,6 @@ def get_data_subject(data, sub, selection_critirium=None):
         for arr in unique_arrays:
             seto = seto | set(arr)
         select = np.array(list(seto))
-        blocks = np.array(range(12))
     else: 
         #In this case we follow least number of missing channels
         select = min(unique_arrays, key=len)
@@ -83,7 +76,6 @@ def get_data_subject(data, sub, selection_critirium=None):
         blocks = np.array(blocks, int)
         
     active_channels = [x for x in range(60) if x not in select]
-    #if Check_Problematic(sub,block)
     
     return data['dataSorted'][active_channels][...,blocks], blocks
 
@@ -106,17 +98,24 @@ def Load_Data(subj=0, data_path = f"E:\data/", Ffilter=False):
     '''
     data = loadmat(data_path+f'dataClean-ICA3-{25+subj}-T1.mat')
     sample, blocks = get_data_subject(data, sub=subj, selection_critirium=None)
+    # Some nans may still remain
+    #if np.any(np.isnan(sample)):
+    #    sample = np.nan_to_num(sample, nan=0.0)
+        
     sha = sample.shape
     sample = np.reshape(sample, (sha[0],sha[1],sha[2]*sha[3]), order='F').T
     sample = np.moveaxis(sample, 1, 2)
     sample = torch.Tensor(sample)
+    
+    #Filtering out the remaining nans due to errors in specific trials
+    without_nans = [index for index in range(sample.shape[0]) if not torch.any(torch.isnan(sample[index]))]
 
     Y_sample, Y_hot = Generate_data(blocks)
 
     if Ffilter:
-        return filter_data(sample), Y_sample, Y_hot
+        return filter_data(sample[without_nans]), Y_sample[without_nans], Y_hot[without_nans]
     else:
-        return sample, Y_sample, Y_hot
+        return sample[without_nans], Y_sample[without_nans], Y_hot[without_nans]
         
 
 def bandpass_filtering(lfp, frq=1000, lp=250., hp=500.):

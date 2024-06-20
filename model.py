@@ -58,7 +58,7 @@ class TimeAggNet(nn.Module):
         return out
 
 '''
-    This model performs two graph convolution with the option to
+    This model performs two graph convolutions with the option to
     have adaptable adjacency matrices.
 '''
 class TimeGraphNet(nn.Module):
