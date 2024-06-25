@@ -45,7 +45,7 @@ def summary(array, text=True):
         print(f"Number of active channels for each trial block: {60-empty}")
     return dict
 
-def get_data_subject(data, sub, selection_critirium=None):
+def get_data_subject(data, sub, selection_critirium=None, channels_only=False):
     
     channel_info = summary(data['dataSorted'], text=False) 
     array_tuples = [tuple(array) for array in channel_info.values()]
@@ -76,7 +76,10 @@ def get_data_subject(data, sub, selection_critirium=None):
         blocks = np.array(blocks, int)
         
     active_channels = [x for x in range(60) if x not in select]
-    
+
+    if channels_only:
+        return active_channels
+        
     return data['dataSorted'][active_channels][...,blocks], blocks
 
 def Generate_data(blocks):
