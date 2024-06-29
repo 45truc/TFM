@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import scipy.signal as spsg
+import re
 
 def plot_(array, channel, trial, block):
     y = array[channel, :, trial, block]
@@ -137,3 +138,22 @@ def filter_data(re_sample):
     for s in range(re_sample.shape[0]):
         filtered[s] = bandpass_filtering(re_sample[s], frq=1000, lp=250., hp=500.)
     return filtered
+
+
+
+def extract_parts(input_string):
+    # Define the regular expression pattern
+    pattern = r"([a-zA-Z]+)(\d+)\.(\d+)"
+
+    # Use re.match to find the pattern in the input string
+    match = re.match(pattern, input_string)
+
+    if match:
+        # Extract the parts using groups
+        name = match.group(1)
+        first_number = match.group(2)
+        number_after_dot = match.group(3)
+
+        return name, int(first_number), int(number_after_dot)
+    else:
+        return None, None, None

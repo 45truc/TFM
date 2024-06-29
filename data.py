@@ -17,14 +17,14 @@ class subjecData():
         self.train_loader = None
         self.test_loader = None
         
-    def build(self, subj=0, batch_size=32, data_path = f"E:\data/", Ffilter=False):
+    def build(self, subj=0, batch_size=32, data_path = f"E:\data/", Ffilter=False, random_state=42):
 
         #Load data
         X, Y_sample, Y_hot = Load_Data(subj=subj, data_path = data_path, Ffilter=Ffilter)
         self.num_nodes = X.shape[1]
         
         # Split the dataset into training and test sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, Y_hot, test_size=self.test_percentage/100, random_state=42)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, Y_hot, test_size=self.test_percentage/100, random_state=random_state)
         
         # Create training and test datasets
         self.train_dataset = TensorDataset(self.X_train, self.y_train)
